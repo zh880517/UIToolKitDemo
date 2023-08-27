@@ -30,9 +30,9 @@ public class AimTarget : MonoBehaviour
         DrawPoint(diagonalP, Color.blue);
         Vector3 dToR = diagonalP - rootP;
         float angle = Vector3.Angle(dToR, targetToRoot);
-        Vector3 axis = Vector3.Cross(dToR, targetToRoot);
+        Vector3 axis = -Vector3.Cross(dToR, targetToRoot);
         axis.Normalize();
-        Draw(rootChildRotation * Quaternion.AngleAxis(Angle, axis), childLocalR, childLocalP, Color.black);
+        Draw(rootChildRotation * Quaternion.AngleAxis(angle, rootChildRotation * axis), childLocalR, childLocalP, Color.black);
         DrawLine(transform.position, transform.position + axis, Color.magenta);
         Quaternion newRotation = rootChildRotation * Quaternion.AngleAxis(angle, axis);
         //Draw(rootChildRotation * CustomRotation, childLocalR, childLocalP, Color.black);
