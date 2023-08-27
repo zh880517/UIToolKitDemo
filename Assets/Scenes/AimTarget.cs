@@ -29,16 +29,31 @@ public class AimTarget : MonoBehaviour
         Vector3 diagonalP = newChildPos + targetToRoot;
         DrawPoint(diagonalP, Color.blue);
         Vector3 dToR = diagonalP - rootP;
-        float angle = Vector3.Angle(dToR, targetToRoot);
+        /*    V-C-----D
+         *    |/     /
+         *    R-----T
+         *    R为根节点，C为子节点，T为目标点，D为R的对焦点，V为在CD上的投影点
+         *    保持T点不变，旋转R，使点T在直线CD上
+         *    旋转后VR依然垂直于CD，VRT三点组成一个直角三角形，可计算出旋转后RV和RT的夹角θ
+         *    90-θ就得到旋转需要的角度
+         */
+        float angleC = Vector3.Angle(diagonalP - newChildPos, newChildPos - rootP);
+        float lenghth = (newChildPos - rootP).magnitude * Mathf.Sin(angleC * Mathf.Deg2Rad);
+        float angle2 = Mathf.Acos(lenghth / targetToRoot.magnitude) * Mathf.Rad2Deg;
+
+        float angle = 90 - angle2;
+        //float angle = Vector3.Angle(dToR, targetToRoot);
         Vector3 axis = Vector3.Cross(dToR, targetToRoot);
         axis.Normalize();
-        //Quaternion newRotation = rootChildRotation * Quaternion.AngleAxis(angle, axis);
-        Draw(rootChildRotation * Quaternion.AngleAxis(angle, Quaternion.Inverse(rootChildRotation) * axis), childLocalR, childLocalP, Color.black);
+        Quaternion newRotation = rootChildRotation * Quaternion.AngleAxis(angle, Quaternion.Inverse(rootChildRotation) * axis);
+        Draw(newRotation, childLocalR, childLocalP, Color.black);
         DrawLine(transform.position, transform.position + axis, Color.magenta);
-        //if (Rotate)
-        //{
-        //    transform.rotation = newRotation;
-        //}
+        Vector3 lastChildWoldP = transform.position + newRotation * childLocalP;
+        DrawLine(lastChildWoldP, Target.position, Color.magenta);
+        if (Rotate)
+        {
+            transform.rotation = newRotation;
+        }
     }
 
     private void Draw(Quaternion rootR, Quaternion childLocalR, Vector3 childLocalP, Color color)
